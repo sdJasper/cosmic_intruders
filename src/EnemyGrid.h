@@ -10,12 +10,16 @@ public:
     float speed = 5.0f;
     float moveTimer = 0.0f;
     float moveInterval = 0.2f;
+    float shootTimer = 0.0f;
+    float shootInterval = 1.0f;
     float dropDistance = 35.0f;
+    std::vector<Bullet> bullets;
 
     EnemyGrid();
     void Update(float deltaTime);
     void Draw();
     void Reset();
     int GetAliveCount() const;
+    void Shoot(const std::vector<Enemy>& enemies);
     void CheckHit(std::vector<Bullet>& bullets);
 };
