@@ -53,9 +53,9 @@ void Player::Draw() {
     // === DRAW BULLETS ===
     for (const auto& b : bullets) {
         if (b.active) {
-            DrawCircleV(b.position, b.radius, YELLOW);
+            DrawLineEx(b.position, {b.position.x, b.position.y + 10}, 2, YELLOW);
             // Optional: Make bullets look nicer
-            // DrawCircleV(b.position, b.radius + 1, Fade(YELLOW, 0.3f));
+            // DrawCircleV(b.position, b.radius + 1, Fade(YELLOW, 0.4f));
         }
     }
 }
