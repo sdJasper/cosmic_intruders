@@ -3,6 +3,9 @@
 #include "Bullet.h"
 #include <vector>
 
+inline constexpr int PLAYER_WIDTH = 38;
+inline constexpr int PLAYER_HEIGHT = 10;
+
 class Player {
 public:
     Rectangle rect;
@@ -14,4 +17,5 @@ public:
     void Update(float deltaTime);
     void Draw();
     void Shoot();
+    static void DrawShip(float x, float y);
 };

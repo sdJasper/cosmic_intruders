@@ -7,9 +7,9 @@ class EnemyGrid {
 public:
     std::vector<Enemy> enemies;
     Vector2 direction = { 1.0f, 0.0f };
-    float speed = 90.0f;
+    float speed = 10.0f;
     float moveTimer = 0.0f;
-    float moveInterval = 0.75f;
+    float moveInterval = 0.2f;
     float dropDistance = 35.0f;
 
     EnemyGrid();

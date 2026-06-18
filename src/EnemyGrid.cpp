@@ -1,4 +1,5 @@
 #include "EnemyGrid.h"
+#include "Utils.h"
 
 EnemyGrid::EnemyGrid() {
     Reset();
@@ -10,9 +11,9 @@ void EnemyGrid::Reset() {
     const int cols = 11;
     const int rows = 5;
     const int startX = 90;
-    const int startY = 80;
-    const int spacingX = 55;
-    const int spacingY = 45;
+    const int startY = GetScreenHeight() * 0.25f;
+    const int spacingX = ENEMY_WIDTH + 8;
+    const int spacingY = ENEMY_HEIGHT + 16;
 
     for (int row = 0; row < rows; row++) {
         for (int col = 0; col < cols; col++) {
@@ -43,8 +44,8 @@ void EnemyGrid::Update(float deltaTime) {
         bool shouldDrop = false;
         for (const auto& e : enemies) {
             if (!e.alive) continue;
-            if (direction.x > 0 && e.position.x + e.width > 780) shouldDrop = true;
-            if (direction.x < 0 && e.position.x < 20) shouldDrop = true;
+            if (direction.x > 0 && e.position.x + e.width > GetScreenWidth()-(e.width*2)) shouldDrop = true;
+            if (direction.x < 0 && e.position.x < (e.width*2)) shouldDrop = true;
         }
 
         if (shouldDrop) {
@@ -69,6 +70,7 @@ void EnemyGrid::CheckHit(std::vector<Bullet>& bullets) {
             if (CheckCollisionCircleRec(b.position, b.radius, enemyRect)) {
                 e.alive = false;
                 b.active = false;
+                speed += 2.0f;
                 break;
             }
         }
@@ -79,8 +81,8 @@ void EnemyGrid::Draw() {
     for (const auto& e : enemies) {
         if (!e.alive) continue;
 
-        Color color = (e.type <= 1) ? RED : 
-                     (e.type == 2) ? ORANGE : YELLOW;
+        Color color = (e.type <= 1) ? GREEN : 
+                     (e.type == 2) ? CYAN : PURPLE;
 
         DrawRectangle(e.position.x, e.position.y, e.width, e.height, color);
         DrawRectangleLines(e.position.x, e.position.y, e.width, e.height, BLACK);

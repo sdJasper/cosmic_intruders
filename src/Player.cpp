@@ -1,7 +1,8 @@
 #include "Player.h"
+#include "Utils.h"
 
 Player::Player() {
-    rect = { 400 - 25, 500, 50, 30 };
+    rect = { GetScreenWidth() / 2.0f, GetScreenHeight() * 0.86f, PLAYER_WIDTH, PLAYER_HEIGHT };
 }
 
 void Player::Update(float deltaTime) {
@@ -47,10 +48,7 @@ void Player::Shoot() {
 
 void Player::Draw() {
     // Draw the ship
-    DrawRectangleRec(rect, WHITE);
-    DrawTriangle({rect.x + rect.width/2, rect.y - 8}, 
-                 {rect.x, rect.y + rect.height}, 
-                 {rect.x + rect.width, rect.y + rect.height}, WHITE);
+    DrawShip(rect.x, rect.y);
 
     // === DRAW BULLETS ===
     for (const auto& b : bullets) {
@@ -60,4 +58,13 @@ void Player::Draw() {
             // DrawCircleV(b.position, b.radius + 1, Fade(YELLOW, 0.3f));
         }
     }
+}
+
+void Player::DrawShip(float x, float y) {
+    DrawRectangleRec({x, y+4, PLAYER_WIDTH, PLAYER_HEIGHT-4}, CYAN); // base
+    Rectangle top = {x, y - 3, PLAYER_WIDTH, PLAYER_HEIGHT};
+    DrawRectangleRounded(top, 0.7f, 5, CYAN); // top
+    DrawTriangle({x + PLAYER_WIDTH/2, y - 9}, 
+                 {x, y + PLAYER_HEIGHT}, 
+                 {x + PLAYER_WIDTH, y + PLAYER_HEIGHT}, CYAN); // cockpit
 }

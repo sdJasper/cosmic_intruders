@@ -26,7 +26,7 @@ private:
     void UpdatePlaying();
     void DrawPlaying();
 
-    Screen screen{800, 600};
+    Screen screen{672, 768}; // original was 224x256    x3 would be 672 x 768
     GameState state = GameState::MAIN_MENU;
     
     Player player;
