@@ -5,7 +5,7 @@ Player::Player(World& worldRef) : world(worldRef) {
     entity = world.CreateEntity();
 
     // Add components
-    entity->AddComponent<Position>(400.0f, 520.0f);           // Starting position
+    entity->AddComponent<Transform2D>(400.0f, 520.0f);           // Starting position
     entity->AddComponent<Velocity>(0.0f, 0.0f);
     entity->AddComponent<Sprite>(WHITE, 48, 32);              // width, height
 }
@@ -19,10 +19,10 @@ Player::~Player() {
 void Player::Update(float deltaTime) {
     if (!entity || !entity->alive) return;
 
-    auto* position = entity->GetComponent<Position>();
+    auto* transform2d = entity->GetComponent<Transform2D>();
     auto* velocity = entity->GetComponent<Velocity>();
 
-    if (!position || !velocity) return;
+    if (!transform2d || !velocity) return;
 
     // Reset horizontal velocity
     velocity->value.x = 0.0f;
@@ -36,34 +36,35 @@ void Player::Update(float deltaTime) {
     }
 
     // Apply movement
-    position->position.x += velocity->value.x * deltaTime;
+    transform2d->position.x += velocity->value.x * deltaTime;
 
     // Keep player within bounds
-    if (position->value.x < leftBoundary)
-        position->value.x = leftBoundary;
+    if (transform2d->position.x < leftBoundary)
+        transform2d->position.x = leftBoundary;
     
-    if (position->value.x > rightBoundary - 48)        // 48 = ship width
-        position->value.x = rightBoundary - 48;
+    if (transform2d->position.x > rightBoundary - 48)        // 48 = ship width
+        transform2d->position.x = rightBoundary - 48;
 }
 
 void Player::Draw() {
     if (!entity || !entity->alive) return;
 
-    auto* position = entity->GetComponent<Position>();
+    auto* transform2d = entity->GetComponent<Transform2D>();
+    auto* velocity = entity->GetComponent<Velocity>();
     auto* sprite   = entity->GetComponent<Sprite>();
 
-    if (position && sprite) {
+    if (transform2d && sprite) {
         // Draw ship body
         DrawRectangleRec(
-            Rectangle{position->value.x, position->value.y, (float)sprite->width, (float)sprite->height},
+            Rectangle{transform2d->position.x, transform2d->position.y, (float)sprite->width, (float)sprite->height},
             sprite->color
         );
 
         // Draw simple ship "nose" / triangle on top
         DrawTriangle(
-            {position->value.x + sprite->width/2, position->value.y - 8},
-            {position->value.x, position->value.y + sprite->height},
-            {position->value.x + sprite->width, position->value.y + sprite->height},
+            {transform2d->position.x + sprite->width/2, transform2d->position.y - 8},
+            {transform2d->position.x, transform2d->position.y + sprite->height},
+            {transform2d->position.x + sprite->width, transform2d->position.y + sprite->height},
             WHITE
         );
     }
