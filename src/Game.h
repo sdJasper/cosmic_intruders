@@ -1,7 +1,12 @@
 #pragma once
 #include "raylib.h"
-#include "World.h"
-#include "Screen.h"
+#include "Player.h"
+#include "EnemyGrid.h"
+
+typedef struct {
+    int width;
+    int height;
+} Screen;
 
 enum class GameState {
     MAIN_MENU,
@@ -18,12 +23,14 @@ public:
 private:
     void Update();
     void Draw();
+    void UpdatePlaying();
+    void DrawPlaying();
 
     Screen screen{672, 768}; // original was 224x256    x3 would be 672 x 768
-    // Screen screen{800, 600};
     GameState state = GameState::MAIN_MENU;
     
-    World world;
+    Player player;
+    EnemyGrid enemyGrid;
     
     int score = 0;
     int lives = 3;
