@@ -18,10 +18,10 @@ endif()
 
 add_executable(${PROJECT_NAME} 
     src/main.cpp
-    src/Game.cpp
-    src/Player.cpp
-    src/EnemyGrid.cpp
-    src/Utils.cpp
+    src/Core/Game.cpp
+    src/Core/World.cpp
+    src/Systems/RenderSystem.cpp
+    src/Utils/Utils.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
