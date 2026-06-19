@@ -30,46 +30,46 @@ void EnemyGrid::Reset() {
 }
 
 void EnemyGrid::Update(float deltaTime) {
+    if (enemies.empty()) return;
+
     moveTimer += deltaTime;
     shootTimer += deltaTime;
-    std::vector<Enemy> canShoot;;
+    
+    std::vector<size_t> canShootIndices;
 
-    if (moveTimer >= moveInterval) {
-        moveTimer = 0.0f;
+    if (moveTimer < moveInterval) return;
 
-        // Move the whole grid sideways
-        // Check if we hit screen edges
-        bool shouldDrop = false;
-        for (auto& e : enemies) {
-            if (!e.alive) continue;
+    moveTimer = 0.0f;
+    bool shouldDrop = false;
 
-            e.position.x += direction.x * speed * moveInterval;
-            if (direction.x > 0 && e.position.x + e.width > GetScreenWidth()-(e.width*2)) shouldDrop = true;
-            if (direction.x < 0 && e.position.x < (e.width*2)) shouldDrop = true;
+    // Move the whole grid sideways
+    for (size_t i = 0; i < enemies.size(); ++i) {
+        Enemy& e = enemies[i];
 
-            if (e.canShoot) {
-                canShoot.push_back(e);
-            }
+        if (!e.alive) continue;
+
+        e.position.x += direction.x * speed * moveInterval;
+
+        if (direction.x > 0 && e.position.x + e.width > GetScreenWidth()-(e.width*2)) shouldDrop = true;
+        if (direction.x < 0 && e.position.x < (e.width*2)) shouldDrop = true;
+
+        if (e.canShoot) {
+            canShootIndices.push_back(i);
         }
+    }
 
-        if (shouldDrop) {
-            direction.x *= -1.0f;   // Reverse direction
-
-            // Drop down
-            for (auto& e : enemies) {
-                if (e.alive) {
-                    e.position.y += dropDistance;
-                }
+    if (shouldDrop) {
+        direction.x = -direction.x;
+        for (auto& e : enemies) {
+            if (e.alive) {
+                e.position.y += dropDistance;
             }
         }
     }
-    if (shootTimer >= shootInterval) {
-        shootTimer = 0.0f;
 
-        if (!canShoot.empty()) {
-            Shoot(canShoot);
-            // Handle shooting logic for the enemies that can shoot
-        }
+    if (!canShootIndices.empty() && shootTimer >= shootInterval) {
+        shootTimer = 0.0f;
+        Shoot(canShootIndices);
     }
 
     // Update bullets
@@ -82,38 +82,52 @@ void EnemyGrid::Update(float deltaTime) {
 
 }
 
-void EnemyGrid::Shoot(const std::vector<Enemy>& enemies) {
-    Enemy e = enemies[GetRandomValue(0, enemies.size() - 1)]; // random enemy from the list
+void EnemyGrid::Shoot(const std::vector<size_t>& canShootIndices) {
+    if (canShootIndices.empty()) return;
+
+    // Pick a random enemy that is allowed to shoot
+    int idx = GetRandomValue(0, canShootIndices.size() - 1);
+    const Enemy& e = enemies[canShootIndices[idx]];
+
     Bullet b;
-    b.position = { e.position.x + e.width/2, e.position.y + e.height };
-    b.velocity = { 0, +600 };
+    b.position = { e.position.x + e.width / 2.0f - 2.0f, e.position.y + e.height };
+    b.velocity = { 0, 550.0f };   // tweak speed as needed
     b.active = true;
     bullets.push_back(b);
 }
 
-void EnemyGrid::CheckHit(std::vector<Bullet>& bullets) {
-    for (auto& b : bullets) {
-        if (!b.active) continue;
-        int enemyIndex = -1;
-        for (auto& e : enemies) {
-            enemyIndex++;
+void EnemyGrid::CheckHit(std::vector<Bullet>& playerBullets) {
+    const int COLS = 11;
 
+    for (auto& b : playerBullets) {
+        if (!b.active) continue;
+
+        for (size_t i = 0; i < enemies.size(); ++i) {
+            Enemy& e = enemies[i];
             if (!e.alive) continue;
-            const Rectangle enemyRect = { e.position.x, e.position.y, e.width+0.0f, e.height+0.0f };
+
+            Rectangle enemyRect = { e.position.x, e.position.y, 
+                                  (float)e.width, (float)e.height };
 
             if (CheckCollisionCircleRec(b.position, b.radius, enemyRect)) {
                 e.alive = false;
                 e.canShoot = false;
-                for (int i = enemyIndex-11; i >= 0; i-=11) {
-                    Enemy higherEnemy = enemies[i];
-                    if (higherEnemy.alive) {
-                        higherEnemy.canShoot = true;
+                b.active = false;
+
+                // === PROMOTE NEW LOWEST SHOOTER IN THE SAME COLUMN ===
+                int col = i % COLS;
+
+                // Scan this column from the bottom up, find the first (lowest) alive enemy
+                for (int row = 4; row >= 0; --row) {           // 5 rows, bottom to top
+                    int index = row * COLS + col;
+                    if (index < (int)enemies.size() && enemies[index].alive) {
+                        enemies[index].canShoot = true;
                         break;
                     }
                 }
-                b.active = false;
+
                 speed += 2.0f;
-                break;
+                break;  // one collision per bullet
             }
         }
     }

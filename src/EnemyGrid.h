@@ -20,6 +20,7 @@ public:
     void Draw();
     void Reset();
     int GetAliveCount() const;
-    void Shoot(const std::vector<Enemy>& enemies);
+    void Shoot(const std::vector<size_t>& canShootIndices);
     void CheckHit(std::vector<Bullet>& bullets);
+    Enemy* GetEnemyAt(int row, int col);
 };
