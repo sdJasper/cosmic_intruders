@@ -1,8 +1,10 @@
 #include "Player.h"
 #include "Utils.h"
+#include "BulletManager.h"
 
 Player::Player() {
     rect = { GetScreenWidth() / 2.0f, GetScreenHeight() * 0.86f, PLAYER_WIDTH, PLAYER_HEIGHT };
+    bulletManager = BulletManager();
 }
 
 void Player::Update(float deltaTime) {
@@ -19,7 +21,7 @@ void Player::Update(float deltaTime) {
 
     // Shooting
     if ((IsKeyDown(KEY_SPACE) || IsKeyDown(KEY_UP)) && shootCooldown <= 0) {
-        Shoot();
+        bulletManager.SpawnPlayerBullet({rect.x + rect.width/2, rect.y});
         shootCooldown = 0.25f;  // fire rate
     }
 
@@ -30,20 +32,6 @@ void Player::Update(float deltaTime) {
             if (b.position.y < 0) b.active = false;
         }
     }
-}
-
-void Player::Shoot() {
-    for (auto& b : bullets) {
-        if (!b.active) {
-            b.position = { rect.x + rect.width/2, rect.y };
-            b.velocity = { 0, -600 };
-            b.active = true;
-            return;
-        }
-    }
-    
-    // Add new bullet if none available
-    bullets.push_back({ {rect.x + rect.width/2, rect.y}, {0, -600}, true });
 }
 
 void Player::Draw() {

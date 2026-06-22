@@ -1,7 +1,9 @@
 #include "EnemyGrid.h"
 #include "Utils.h"
+#include "BulletManager.h"
 
 EnemyGrid::EnemyGrid() {
+    bulletManager = BulletManager();
     Reset();
 }
 
@@ -69,7 +71,8 @@ void EnemyGrid::Update(float deltaTime) {
 
     if (!canShootIndices.empty() && shootTimer >= shootInterval) {
         shootTimer = 0.0f;
-        Shoot(canShootIndices);
+        Enemy& shooter = enemies[canShootIndices[GetRandomValue(0, canShootIndices.size() - 1)]];
+        bulletManager.SpawnEnemyBullet(shooter.position);
     }
 
     // Update bullets
@@ -80,20 +83,6 @@ void EnemyGrid::Update(float deltaTime) {
         }
     }
 
-}
-
-void EnemyGrid::Shoot(const std::vector<size_t>& canShootIndices) {
-    if (canShootIndices.empty()) return;
-
-    // Pick a random enemy that is allowed to shoot
-    int idx = GetRandomValue(0, canShootIndices.size() - 1);
-    const Enemy& e = enemies[canShootIndices[idx]];
-
-    Bullet b;
-    b.position = { e.position.x + e.width / 2.0f - 2.0f, e.position.y + e.height };
-    b.velocity = { 0, 550.0f };   // tweak speed as needed
-    b.active = true;
-    bullets.push_back(b);
 }
 
 void EnemyGrid::CheckHit(std::vector<Bullet>& playerBullets) {

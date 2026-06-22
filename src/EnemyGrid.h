@@ -2,6 +2,7 @@
 #include "Enemy.h"
 #include <vector>
 #include "Bullet.h"
+#include "BulletManager.h"
 
 class EnemyGrid {
 public:
@@ -14,13 +15,13 @@ public:
     float shootInterval = 1.0f;
     float dropDistance = 35.0f;
     std::vector<Bullet> bullets;
+    BulletManager bulletManager;
 
     EnemyGrid();
     void Update(float deltaTime);
     void Draw();
     void Reset();
     int GetAliveCount() const;
-    void Shoot(const std::vector<size_t>& canShootIndices);
     void CheckHit(std::vector<Bullet>& bullets);
     Enemy* GetEnemyAt(int row, int col);
 };

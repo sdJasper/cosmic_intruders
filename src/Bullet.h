@@ -6,4 +6,5 @@ struct Bullet {
     Vector2 velocity;
     bool active = false;
     float radius = 4.0f;
+    Color color = YELLOW;
 };
