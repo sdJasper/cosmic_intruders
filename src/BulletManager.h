@@ -1,6 +1,8 @@
 #pragma once
 #include "Bullet.h"
 #include <vector>
+#include "Player.h"
+#include "EnemyGrid.h"
 
 class Player;
 class EnemyGrid;

@@ -5,6 +5,7 @@
 Game::Game() {
     InitWindow(screen.width, screen.height, "Cosmic Intruders");
     SetTargetFPS(60);
+    bulletManager = BulletManager();
 }
 
 void Game::Run() {
@@ -21,7 +22,7 @@ void Game::Update() {
             if (IsKeyPressed(KEY_ENTER)) {
                 state = GameState::PLAYING;
                 enemyGrid.Reset();
-                player = Player();           // Reset player
+                player = Player();
                 score = 0;
             }
             break;
@@ -50,11 +51,11 @@ void Game::Update() {
 void Game::UpdatePlaying() {
     float deltaTime = GetFrameTime();
     
-    player.Update(deltaTime);
-    enemyGrid.Update(deltaTime);
+    player.Update(deltaTime, bulletManager);
+    enemyGrid.Update(deltaTime, bulletManager);
 
-    // TODO: Add collision detection (player bullets vs enemies)
-    enemyGrid.CheckHit(player.bullets);
+    bulletManager.Update(deltaTime);
+    bulletManager.CheckCollisions(enemyGrid, player);
 }
 
 void Game::Draw() {
@@ -90,6 +91,7 @@ void Game::Draw() {
 void Game::DrawPlaying() {
     player.Draw();
     enemyGrid.Draw();
+    bulletManager.Draw();
 
     // HUD
     // Utils::DrawTextCentered(TextFormat("SCORE: %05i", score), 0.05f, 20, WHITE);

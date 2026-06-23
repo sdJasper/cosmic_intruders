@@ -4,10 +4,13 @@
 
 Player::Player() {
     rect = { GetScreenWidth() / 2.0f, GetScreenHeight() * 0.86f, PLAYER_WIDTH, PLAYER_HEIGHT };
-    bulletManager = BulletManager();
 }
 
-void Player::Update(float deltaTime) {
+Rectangle Player::GetRect() const {
+    return rect;
+}
+
+void Player::Update(float deltaTime, BulletManager& bulletManager) {
     // Movement
     if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A))  rect.x -= speed * deltaTime;
     if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) rect.x += speed * deltaTime;

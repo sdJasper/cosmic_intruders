@@ -3,7 +3,6 @@
 #include "BulletManager.h"
 
 EnemyGrid::EnemyGrid() {
-    bulletManager = BulletManager();
     Reset();
 }
 
@@ -31,7 +30,7 @@ void EnemyGrid::Reset() {
     }
 }
 
-void EnemyGrid::Update(float deltaTime) {
+void EnemyGrid::Update(float deltaTime, BulletManager& bulletManager) {
     if (enemies.empty()) return;
 
     moveTimer += deltaTime;
@@ -52,7 +51,7 @@ void EnemyGrid::Update(float deltaTime) {
 
         e.position.x += direction.x * speed * moveInterval;
 
-        if (direction.x > 0 && e.position.x + e.width > GetScreenWidth()-(e.width*2)) shouldDrop = true;
+        if (direction.x > 0 && e.position.x + e.width > GetScreenWidth()-(e.width*1)) shouldDrop = true;
         if (direction.x < 0 && e.position.x < (e.width*2)) shouldDrop = true;
 
         if (e.canShoot) {
@@ -72,7 +71,8 @@ void EnemyGrid::Update(float deltaTime) {
     if (!canShootIndices.empty() && shootTimer >= shootInterval) {
         shootTimer = 0.0f;
         Enemy& shooter = enemies[canShootIndices[GetRandomValue(0, canShootIndices.size() - 1)]];
-        bulletManager.SpawnEnemyBullet(shooter.position);
+        const Vector2 origin = {x: shooter.position.x + (shooter.width / 2), y: shooter.position.y + shooter.height};
+        bulletManager.SpawnEnemyBullet(origin);
     }
 
     // Update bullets
@@ -83,43 +83,6 @@ void EnemyGrid::Update(float deltaTime) {
         }
     }
 
-}
-
-void EnemyGrid::CheckHit(std::vector<Bullet>& playerBullets) {
-    const int COLS = 11;
-
-    for (auto& b : playerBullets) {
-        if (!b.active) continue;
-
-        for (size_t i = 0; i < enemies.size(); ++i) {
-            Enemy& e = enemies[i];
-            if (!e.alive) continue;
-
-            Rectangle enemyRect = { e.position.x, e.position.y, 
-                                  (float)e.width, (float)e.height };
-
-            if (CheckCollisionCircleRec(b.position, b.radius, enemyRect)) {
-                e.alive = false;
-                e.canShoot = false;
-                b.active = false;
-
-                // === PROMOTE NEW LOWEST SHOOTER IN THE SAME COLUMN ===
-                int col = i % COLS;
-
-                // Scan this column from the bottom up, find the first (lowest) alive enemy
-                for (int row = 4; row >= 0; --row) {           // 5 rows, bottom to top
-                    int index = row * COLS + col;
-                    if (index < (int)enemies.size() && enemies[index].alive) {
-                        enemies[index].canShoot = true;
-                        break;
-                    }
-                }
-
-                speed += 2.0f;
-                break;  // one collision per bullet
-            }
-        }
-    }
 }
 
 void EnemyGrid::Draw() {

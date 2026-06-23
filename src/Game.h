@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include "Player.h"
 #include "EnemyGrid.h"
+#include "BulletManager.h"
 
 typedef struct {
     int width;
@@ -31,7 +32,8 @@ private:
     
     Player player;
     EnemyGrid enemyGrid;
-    
+    BulletManager bulletManager;
+
     int score = 0;
     int lives = 3;
     int level = 1;
