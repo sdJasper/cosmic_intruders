@@ -30,6 +30,7 @@ void Game::Update() {
         case GameState::PLAYING:
             if (IsKeyPressed(KEY_P)) {
                 state = GameState::PAUSED;
+                break;
             }
             UpdatePlaying();
             break;

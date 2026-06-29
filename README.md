@@ -3,10 +3,11 @@ Space Invaders Clone in C++
 
 # Todo:
     1. Enemy - done
-        > should bullets be moved to their own service?
-    2. Player death (shot or enemies reach bottom)
-    3. Shields
-    4. Levels
-    5. Extra life award
-    6. Sprites and movement
-    7. Balancing
+    2. Bullet service - done
+    3. Player death (shot or enemies reach bottom)
+    4. Shields
+    5. Levels
+    6. Extra life award
+    7. Sprites and movement
+    8. Balancing - try to match original vs modern take
+    9. Polish
