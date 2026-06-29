@@ -2,7 +2,6 @@
 #include "raylib.h"
 #include "Bullet.h"
 #include <vector>
-// #include "BulletManager.h"
 
 class BulletManager;
 
@@ -13,7 +12,6 @@ class Player {
 public:
     Rectangle rect;
     float speed = 400.0f;
-    std::vector<Bullet> bullets;
     float shootCooldown = 0.0f;
     Rectangle GetRect() const;
 

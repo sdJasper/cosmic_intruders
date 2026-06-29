@@ -7,9 +7,6 @@ EnemyGrid::EnemyGrid() {
 }
 
 void EnemyGrid::Reset() {
-    enemies.clear();
-    
-    const int cols = 11;
     const int rows = 5;
     const int startX = 90;
     const int startY = GetScreenHeight() * 0.25f;
@@ -18,7 +15,7 @@ void EnemyGrid::Reset() {
 
     for (int row = 0; row < rows; row++) {
         bool canShoot = (row == rows - 1); // Only the bottom row can shoot
-        for (int col = 0; col < cols; col++) {
+        for (int col = 0; col < COLS; col++) {
             Enemy e;
             e.position.x = startX + col * spacingX;
             e.position.y = startY + row * spacingY;
@@ -35,8 +32,14 @@ void EnemyGrid::Update(float deltaTime, BulletManager& bulletManager) {
 
     moveTimer += deltaTime;
     shootTimer += deltaTime;
-    
     std::vector<size_t> canShootIndices;
+
+    if (!canShootIndices.empty() && shootTimer >= shootInterval) {
+        shootTimer = 0.0f;
+        Enemy& shooter = enemies[canShootIndices[GetRandomValue(0, canShootIndices.size() - 1)]];
+        const Vector2 origin = {shooter.position.x + (shooter.width / 2), shooter.position.y + shooter.height};
+        bulletManager.SpawnEnemyBullet(origin);
+    }
 
     if (moveTimer < moveInterval) return;
 
@@ -67,22 +70,6 @@ void EnemyGrid::Update(float deltaTime, BulletManager& bulletManager) {
             }
         }
     }
-
-    if (!canShootIndices.empty() && shootTimer >= shootInterval) {
-        shootTimer = 0.0f;
-        Enemy& shooter = enemies[canShootIndices[GetRandomValue(0, canShootIndices.size() - 1)]];
-        const Vector2 origin = {x: shooter.position.x + (shooter.width / 2), y: shooter.position.y + shooter.height};
-        bulletManager.SpawnEnemyBullet(origin);
-    }
-
-    // Update bullets
-    for (auto& b : bullets) {
-        if (b.active) {
-            b.position.y += b.velocity.y * deltaTime;
-            if (b.position.y < 0) b.active = false;
-        }
-    }
-
 }
 
 void EnemyGrid::Draw() {
@@ -95,14 +82,6 @@ void EnemyGrid::Draw() {
         DrawRectangle(e.position.x, e.position.y, e.width, e.height, color);
         DrawRectangleLines(e.position.x, e.position.y, e.width, e.height, BLACK);
     }
-
-    // === DRAW BULLETS ===
-    for (const auto& b : bullets) {
-        if (b.active) {
-            DrawLineEx(b.position, {b.position.x, b.position.y + 10}, 2, YELLOW);
-        }
-    }
-
 }
 
 int EnemyGrid::GetAliveCount() const {

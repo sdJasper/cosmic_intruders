@@ -17,7 +17,7 @@ void Player::Update(float deltaTime, BulletManager& bulletManager) {
 
     // Keep on screen
     if (rect.x < 0) rect.x = 0;
-    if (rect.x + rect.width > 800) rect.x = 800 - rect.width;
+    if (rect.x + rect.width > GetScreenWidth()) rect.x = GetScreenWidth() - rect.width;
 
     // Cooldown
     if (shootCooldown > 0) shootCooldown -= deltaTime;
@@ -27,28 +27,11 @@ void Player::Update(float deltaTime, BulletManager& bulletManager) {
         bulletManager.SpawnPlayerBullet({rect.x + rect.width/2, rect.y});
         shootCooldown = 0.25f;  // fire rate
     }
-
-    // Update bullets
-    for (auto& b : bullets) {
-        if (b.active) {
-            b.position.y += b.velocity.y * deltaTime;
-            if (b.position.y < 0) b.active = false;
-        }
-    }
 }
 
 void Player::Draw() {
     // Draw the ship
     DrawShip(rect.x, rect.y);
-
-    // === DRAW BULLETS ===
-    for (const auto& b : bullets) {
-        if (b.active) {
-            DrawLineEx(b.position, {b.position.x, b.position.y + 10}, 2, YELLOW);
-            // Optional: Make bullets look nicer
-            // DrawCircleV(b.position, b.radius + 1, Fade(YELLOW, 0.4f));
-        }
-    }
 }
 
 void Player::DrawShip(float x, float y) {

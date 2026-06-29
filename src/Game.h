@@ -4,10 +4,10 @@
 #include "EnemyGrid.h"
 #include "BulletManager.h"
 
-typedef struct {
+struct Screen {
     int width;
     int height;
-} Screen;
+};
 
 enum class GameState {
     MAIN_MENU,

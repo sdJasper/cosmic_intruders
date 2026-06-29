@@ -5,9 +5,10 @@
 
 class BulletManager;
 
+inline constexpr int COLS = 11;
+
 class EnemyGrid {
-public:
-    std::vector<Enemy> enemies;
+private:
     Vector2 direction = { 1.0f, 0.0f };
     float speed = 6.0f;
     float moveTimer = 0.0f;
@@ -15,8 +16,9 @@ public:
     float shootTimer = 0.0f;
     float shootInterval = 1.0f;
     float dropDistance = 35.0f;
-    std::vector<Bullet> bullets;
-    const std::vector<Enemy>& GetEnemies() const { return enemies; }
+    std::vector<Enemy> enemies;
+
+public:
     std::vector<Enemy>& GetEnemies() { return enemies; }
 
     EnemyGrid();
@@ -24,6 +26,4 @@ public:
     void Draw();
     void Reset();
     int GetAliveCount() const;
-    void CheckHit(std::vector<Bullet>& bullets);
-    Enemy* GetEnemyAt(int row, int col);
 };

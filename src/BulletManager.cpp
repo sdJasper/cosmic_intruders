@@ -1,8 +1,7 @@
 #include "BulletManager.h"
 #include "Enemy.h"
-
-// BulletManager::BulletManager() {
-// 
+#include "EnemyGrid.h"
+#include "Player.h"
 
 void BulletManager::SpawnPlayerBullet(Vector2 position) {
     for (auto& b : playerBullets) {
@@ -58,8 +57,7 @@ void BulletManager::Draw() {
 }
 
 void BulletManager::CheckCollisions(EnemyGrid& enemyGrid, Player& player) {
-    const int COLS = 11;
-    const auto& enemies = enemyGrid.GetEnemies();   // ← Use getter
+    auto& enemies = enemyGrid.GetEnemies(); // calls the non-const overload
     const auto& playerRect = player.GetRect();
 
     // Player bullets vs Enemies
