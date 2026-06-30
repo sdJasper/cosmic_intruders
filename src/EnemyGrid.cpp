@@ -1,6 +1,7 @@
 #include "EnemyGrid.h"
 #include "Utils.h"
 #include "BulletManager.h"
+#include <string>
 
 EnemyGrid::EnemyGrid() {
 }
@@ -19,9 +20,12 @@ void EnemyGrid::Reset() {
             Enemy e;
             e.position.x = startX + col * spacingX;
             e.position.y = startY + row * spacingY;
-            e.type = (row+1) / 2;                    // Higher rows = different enemy type
+            e.type = (row+1) / 2; // Assign type based on row (0, 1, 2)
             e.alive = true;
             e.canShoot = canShoot;
+            const std::string texturePath = "assets/enemy" + std::to_string(e.type);
+            e.texture[0] = LoadTexture((texturePath + "_0.png").c_str());
+            e.texture[1] = LoadTexture((texturePath + "_1.png").c_str());
             enemies.push_back(e);
         }
     }
@@ -48,6 +52,7 @@ void EnemyGrid::Update(float deltaTime, BulletManager& bulletManager) {
         if (e.canShoot) canShootIndices.push_back(i);
 
         if (shouldMove) {
+            e.currentFrame = 1 - e.currentFrame;
             moveTimer = 0.0f;
             e.position.x += direction.x * speed * moveInterval;
             if (e.position.x + e.width > GetScreenWidth()-(e.width*1) || e.position.x < (e.width*2)) {
@@ -75,14 +80,11 @@ void EnemyGrid::Update(float deltaTime, BulletManager& bulletManager) {
 }
 
 void EnemyGrid::Draw() {
-    for (const auto& e : enemies) {
+    const Color collorArray[] = {RED, ORANGE, YELLOW};
+    for (auto& e : enemies) {
         if (!e.alive) continue;
 
-        std::vector<Color> colors = { GREEN, CYAN, PURPLE };
-        Color color = colors[e.type];
-
-        DrawRectangle(e.position.x, e.position.y, e.width, e.height, color);
-        DrawRectangleLines(e.position.x, e.position.y, e.width, e.height, BLACK);
+        DrawTexture(e.texture[e.currentFrame], (int)e.position.x, (int)e.position.y, collorArray[e.type]);
     }
 }
 

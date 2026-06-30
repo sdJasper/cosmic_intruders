@@ -25,4 +25,6 @@ private:
 
     void UpdateBullets(std::vector<Bullet>& bullets, float deltaTime);
     void DrawBullets(const std::vector<Bullet>& bullets);
+
+    static void DrawExplosion(Vector2 center, Color color);
 };

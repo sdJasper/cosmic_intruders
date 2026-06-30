@@ -57,7 +57,6 @@ void BulletManager::Draw() {
     DrawBullets(enemyBullets);
 }
 
-
 int BulletManager::CheckCollisions(EnemyGrid& enemyGrid, Player& player, std::vector<Shield>& shields, bool& playerHit) {
     int pointsEarned = 0;
     playerHit = false;
@@ -98,6 +97,7 @@ int BulletManager::CheckCollisions(EnemyGrid& enemyGrid, Player& player, std::ve
                 enemy.canShoot = false;
                 pb.active = false;
                 pointsEarned += 10;
+                BulletManager::DrawExplosion({enemy.position.x + enemy.width / 2, enemy.position.y + enemy.height / 2}, YELLOW);
 
                 int col = (&enemy - &enemies[0]) % COLS;
                 for (int row = 0; row < (int)enemies.size() / COLS; row++) {
@@ -155,3 +155,19 @@ void BulletManager::DrawBullets(const std::vector<Bullet>& bullets) {
         DrawLine(b.position.x, b.position.y, b.position.x, b.position.y + 10, b.color);
     }
 }
+
+void BulletManager::DrawExplosion(Vector2 center, Color color) {
+    float size = 8.0f;
+    DrawLineEx(center, {center.x + size, center.y}, 4, color);
+    DrawLineEx(center, {center.x - size, center.y}, 4, color);
+    DrawLineEx(center, {center.x, center.y + size}, 4, color);
+    DrawLineEx(center, {center.x, center.y - size}, 4, color);
+
+    float d = size * 0.707f; // ~45 degrees
+    DrawLineEx(center, {center.x + d, center.y + d}, 3, YELLOW);
+    DrawLineEx(center, {center.x - d, center.y - d}, 3, YELLOW);
+    DrawLineEx(center, {center.x + d, center.y - d}, 2.5f, Fade(RED, 0.7f));
+    DrawLineEx(center, {center.x - d, center.y + d}, 2.5f, Fade(RED, 0.7f));
+
+}
+

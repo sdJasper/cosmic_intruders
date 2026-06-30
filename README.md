@@ -2,11 +2,13 @@
 Space Invaders Clone in C++
 
 # Todo:
-    Shields & shield damage
-    Enemy death fx
-    Player death fx
+    Shields & shield damage - done
+    Enemy apperance (sprite system?) - done
+
+    Death fx - wip
+
+    Add fling saucer
     Player respawn time/location
     Level progression
-    Extra life award
-    Enemy apperance (sprite system?)
+    Extra life award (1500 then ?)
     Balancing and Polish

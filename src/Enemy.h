@@ -11,5 +11,8 @@ struct Enemy {
     bool alive = true;
     int type = 0;
     float animationTimer = 0.0f;
+    int currentFrame = 0;
     bool canShoot = false;
+
+    Texture2D texture[2];
 };
