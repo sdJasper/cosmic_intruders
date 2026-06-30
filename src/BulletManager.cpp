@@ -96,7 +96,8 @@ int BulletManager::CheckCollisions(EnemyGrid& enemyGrid, Player& player, std::ve
                 enemy.alive = false;
                 enemy.canShoot = false;
                 pb.active = false;
-                pointsEarned += 10;
+                pointsEarned += 10 * (3 - enemy.type);
+                enemyGrid.OnEnemyKilled();
                 BulletManager::DrawExplosion({enemy.position.x + enemy.width / 2, enemy.position.y + enemy.height / 2}, YELLOW);
 
                 int col = (&enemy - &enemies[0]) % COLS;

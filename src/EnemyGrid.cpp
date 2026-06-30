@@ -7,6 +7,8 @@ EnemyGrid::EnemyGrid() {
 }
 
 void EnemyGrid::Reset() {
+    moveInterval = BASE_INTERVAL;
+
     const int rows = 5;
     const int startX = 90;
     const int startY = GetScreenHeight() * 0.25f;
@@ -53,8 +55,7 @@ void EnemyGrid::Update(float deltaTime, BulletManager& bulletManager) {
 
         if (shouldMove) {
             e.currentFrame = 1 - e.currentFrame;
-            moveTimer = 0.0f;
-            e.position.x += direction.x * speed * moveInterval;
+            e.position.x += direction.x * STEP_SIZE;
             if (e.position.x + e.width > GetScreenWidth()-(e.width*1) || e.position.x < (e.width*2)) {
                 shouldDrop = true;
             }
@@ -94,4 +95,12 @@ int EnemyGrid::GetAliveCount() const {
         if (e.alive) count++;
     }
     return count;
+}
+
+void EnemyGrid::OnEnemyKilled() {
+    int alive = GetAliveCount();
+    if (alive <= 0) return;
+
+    float t = 1.0f - ((float)alive / (float)TOTAL_ENEMIES); // 0.0 full, 1.0 last one
+    moveInterval = BASE_INTERVAL + t * (MIN_INTERVAL - BASE_INTERVAL);
 }
