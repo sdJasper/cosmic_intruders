@@ -2,8 +2,10 @@
 #include "Bullet.h"
 #include <vector>
 
-class Player;
+// Forward declarations
 class EnemyGrid;
+class Player;
+class Shield;
 
 class BulletManager {
 public:
@@ -13,7 +15,7 @@ public:
     void Update(float deltaTime);
     void Draw();
 
-    int CheckCollisions(EnemyGrid& enemyGrid, Player& player, bool& playerHit);
+    int CheckCollisions(EnemyGrid& enemyGrid, Player& player, std::vector<Shield>& shields, bool& playerHit);
 
     void Reset();
 

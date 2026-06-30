@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "Utils.h"
 #include "Player.h"
+#include "Shield.h"
 
 Game::Game() {
     InitWindow(screen.width, screen.height, "Cosmic Intruders");
@@ -20,13 +21,14 @@ void Game::Update() {
     switch (state) {
         case GameState::MAIN_MENU:
             if (IsKeyPressed(KEY_ENTER)) {
-                state = GameState::PLAYING;
                 enemyGrid.Reset();
                 bulletManager.Reset();
                 player = Player();
+                InitShields();
                 score = 0;
                 lives = 3;
                 level = 1;
+                state = GameState::PLAYING;
             }
             break;
 
@@ -52,6 +54,7 @@ void Game::Update() {
     }
 }
 
+
 void Game::UpdatePlaying() {
     float deltaTime = GetFrameTime();
     
@@ -60,7 +63,8 @@ void Game::UpdatePlaying() {
 
     bulletManager.Update(deltaTime);
     bool playerHit = false;
-    score += bulletManager.CheckCollisions(enemyGrid, player, playerHit);
+    score += bulletManager.CheckCollisions(enemyGrid, player, shields, playerHit);
+
     if (playerHit) {
         lives -= 1;
         if (lives <= 0) {
@@ -69,14 +73,18 @@ void Game::UpdatePlaying() {
     }
 }
 
+
 void Game::Draw() {
     BeginDrawing();
     ClearBackground(BLACK);
     
     switch (state) {
         case GameState::PLAYING:
-        DrawPlaying();
-        break;
+            DrawPlaying();
+            for (auto& shield : shields) {
+               shield.Draw();
+            }
+            break;
         
         case GameState::MAIN_MENU: {
             Utils::DrawTextCentered("COSMIC INTRUDERS", 0.33f, 60, RAYWHITE);
@@ -91,6 +99,9 @@ void Game::Draw() {
 
         case GameState::PAUSED:
             DrawPlaying();
+            for (auto& shield : shields) {
+               shield.Draw();
+            }
             Utils::DrawTextCentered("PAUSED", 0.5f, 50, YELLOW);
             Utils::DrawTextCentered("Press P to Resume", 0.6f, 30, LIGHTGRAY);
             break;
@@ -117,10 +128,31 @@ void Game::DrawPlaying() {
         Player::DrawShip(offset, GetScreenHeight() * 0.95f);
         offset += PLAYER_WIDTH + 10;
     }
-    // Utils::DrawTextCentered(TextFormat("LIVES: %i", lives), 0.1f, 20, WHITE);
-    // Utils::DrawTextCentered(TextFormat("LEVEL: %i", level), 0.95f, 20, WHITE);
 }
 
 void Game::UpdateScore(int points) {
     score += points;
+}
+
+void Game::InitShields() {
+    shields.clear();
+
+    const int shieldCount = 4;
+    const float shieldWidth = Shield::COLS * Shield::CELL_SIZE;
+    const float screenWidth = (float)GetScreenWidth();
+    const float marginY = 100.0f + (Shield::COLS * Shield::CELL_SIZE); // distance above player
+
+    // evenly distribute shields across the width, with margins on the outer edges
+    float totalGapSpace = screenWidth - (shieldCount * shieldWidth);
+    float gap = totalGapSpace / (shieldCount + 1);
+
+    for (int i = 0; i < shieldCount; i++) {
+        Shield shield;
+        shield.position = {
+            gap + i * (shieldWidth + gap),
+            (float)GetScreenHeight() - marginY - (Shield::ROWS * Shield::CELL_SIZE)
+        };
+        shield.Reset(); // carves the default silhouette, all cells intact
+        shields.push_back(shield);
+    }
 }

@@ -2,6 +2,7 @@
 #include "Enemy.h"
 #include "EnemyGrid.h"
 #include "Player.h"
+#include "Shield.h"
 
 void BulletManager::SpawnPlayerBullet(Vector2 position) {
     for (auto& b : playerBullets) {
@@ -56,67 +57,81 @@ void BulletManager::Draw() {
     DrawBullets(enemyBullets);
 }
 
-int BulletManager::CheckCollisions(EnemyGrid& enemyGrid, Player& player, bool& playerHit) {
-    auto& enemies = enemyGrid.GetEnemies(); // calls the non-const overload
-    const auto& playerRect = player.GetRect();
-    int score = 0;
+
+int BulletManager::CheckCollisions(EnemyGrid& enemyGrid, Player& player, std::vector<Shield>& shields, bool& playerHit) {
+    int pointsEarned = 0;
     playerHit = false;
 
-    // Player bullets vs Enemies
+    // --- Player bullets vs shields ---
     for (auto& pb : playerBullets) {
         if (!pb.active) continue;
-
-        for (size_t i = 0; i < enemies.size(); ++i) {
-            const Enemy& e = enemies[i];
-            if (!e.alive) continue;
-
-            Rectangle enemyRect = { e.position.x, e.position.y, 
-                                  (float)e.width, (float)e.height };
-
-            if (CheckCollisionCircleRec(pb.position, pb.radius, enemyRect)) {
-                // Hit!
-                // Note: Since 'enemies' is const, we need to modify via enemyGrid
-                Enemy& mutableEnemy = const_cast<Enemy&>(e);  // ugly but works for now
-                mutableEnemy.alive = false;
-                mutableEnemy.canShoot = false;
+        for (auto& shield : shields) {
+            if (shield.CheckHit(pb.position, pb.radius)) {
                 pb.active = false;
-                score += 30 - (e.type * 10);
-                // Promote new shooter in column
-                int col = i % COLS;
-                for (int row = 4; row >= 0; --row) {
-                    int index = row * COLS + col;
-                    if (index < (int)enemies.size() && enemies[index].alive) {
-                        Enemy& newShooter = const_cast<Enemy&>(enemies[index]);
-                        newShooter.canShoot = true;
-                        break;
-                    }
-                }
-
                 break;
             }
         }
     }
 
-    // Check collisions between enemy bullets and the player
-
+    // --- Enemy bullets vs shields ---
     for (auto& eb : enemyBullets) {
         if (!eb.active) continue;
-
-        if (CheckCollisionCircleRec(eb.position, eb.radius, playerRect)) {
-            // Handle player hit
-            eb.active = false;
-            playerHit = true;
-            break;  // one collision per bullet
+        for (auto& shield : shields) {
+            if (shield.CheckHit(eb.position, eb.radius)) {
+                eb.active = false;
+                break;
+            }
         }
     }
 
-    return score;
+    // --- Player bullets vs enemies ---
+    auto& enemies = enemyGrid.GetEnemies();
+    for (auto& pb : playerBullets) {
+        if (!pb.active) continue;
+
+        for (auto& enemy : enemies) {
+            if (!enemy.alive) continue;
+
+            Rectangle enemyRect = { enemy.position.x, enemy.position.y, enemy.width, enemy.height };
+            if (CheckCollisionCircleRec(pb.position, pb.radius, enemyRect)) {
+                enemy.alive = false;
+                enemy.canShoot = false;
+                pb.active = false;
+                pointsEarned += 10;
+
+                int col = (&enemy - &enemies[0]) % COLS;
+                for (int row = 0; row < (int)enemies.size() / COLS; row++) {
+                    int idx = row * COLS + col;
+                    if (idx < (int)enemies.size() && enemies[idx].alive) {
+                        enemies[idx].canShoot = true;
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    // --- Enemy bullets vs player ---
+    for (auto& eb : enemyBullets) {
+        if (!eb.active) continue;
+
+        Rectangle playerRect = { player.rect.x, player.rect.y, player.rect.width, player.rect.height };
+        if (CheckCollisionCircleRec(eb.position, eb.radius, playerRect)) {
+            eb.active = false;
+            playerHit = true;
+        }
+    }
+
+    return pointsEarned;
 }
+
 
 void BulletManager::Reset() {
     playerBullets.clear();
     enemyBullets.clear();
 }
+
 
 void BulletManager::UpdateBullets(std::vector<Bullet>& bullets, float deltaTime) {
     for (auto& b : bullets) {

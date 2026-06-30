@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "EnemyGrid.h"
 #include "BulletManager.h"
+#include "Shield.h"
 
 struct Screen {
     int width;
@@ -33,6 +34,7 @@ private:
     Player player;
     EnemyGrid enemyGrid;
     BulletManager bulletManager;
+    std::vector<Shield> shields;
 
     int score = 0;
     int lives = 3;
@@ -40,4 +42,5 @@ private:
 
     // updateScore
     void UpdateScore(int points);
+    void InitShields();
 };

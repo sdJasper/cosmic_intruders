@@ -23,6 +23,7 @@ add_executable(${PROJECT_NAME}
     src/EnemyGrid.cpp
     src/Utils.cpp
     src/BulletManager.cpp
+    src/Shield.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)

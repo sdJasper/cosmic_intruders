@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "Utils.h"
 #include "BulletManager.h"
+#include "math.h"
 
 Player::Player() {
     rect = { GetScreenWidth() / 2.0f, GetScreenHeight() * 0.86f, PLAYER_WIDTH, PLAYER_HEIGHT };
@@ -35,10 +36,11 @@ void Player::Draw() {
 }
 
 void Player::DrawShip(float x, float y) {
-    DrawRectangleRec({x, y+4, PLAYER_WIDTH, PLAYER_HEIGHT-4}, CYAN); // base
-    Rectangle top = {x, y - 3, PLAYER_WIDTH, PLAYER_HEIGHT};
+    const int third = std::ceil(PLAYER_HEIGHT / 3.0);
+    DrawRectangleRec({x, y+(third*2)-2, PLAYER_WIDTH, third+2}, CYAN); // base
+    Rectangle top = {x, y+third, PLAYER_WIDTH, third};
     DrawRectangleRounded(top, 0.7f, 5, CYAN); // top
-    DrawTriangle({x + PLAYER_WIDTH/2, y - 9}, 
-                 {x, y + PLAYER_HEIGHT}, 
-                 {x + PLAYER_WIDTH, y + PLAYER_HEIGHT}, CYAN); // cockpit
+    DrawTriangle({x + PLAYER_WIDTH/2, y}, // triangle top? 
+                 {x, y + PLAYER_HEIGHT}, // bottom left?
+                 {x + PLAYER_WIDTH, y + PLAYER_HEIGHT}, CYAN); // triangle bottom right?
 }

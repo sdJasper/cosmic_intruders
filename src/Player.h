@@ -6,7 +6,7 @@
 class BulletManager;
 
 inline constexpr int PLAYER_WIDTH = 38;
-inline constexpr int PLAYER_HEIGHT = 10;
+inline constexpr int PLAYER_HEIGHT = 20;
 
 class Player {
 public:
@@ -19,4 +19,5 @@ public:
     void Update(float deltaTime, BulletManager& bulletManager);
     void Draw();
     static void DrawShip(float x, float y);
+    void TakeHit();
 };
