@@ -37,4 +37,7 @@ private:
     int score = 0;
     int lives = 3;
     int level = 1;
+
+    // updateScore
+    void UpdateScore(int points);
 };

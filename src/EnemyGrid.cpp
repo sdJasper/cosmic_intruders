@@ -3,7 +3,6 @@
 #include "BulletManager.h"
 
 EnemyGrid::EnemyGrid() {
-    Reset();
 }
 
 void EnemyGrid::Reset() {
@@ -12,6 +11,7 @@ void EnemyGrid::Reset() {
     const int startY = GetScreenHeight() * 0.25f;
     const int spacingX = ENEMY_WIDTH + 8;
     const int spacingY = ENEMY_HEIGHT + 16;
+    enemies.clear();
 
     for (int row = 0; row < rows; row++) {
         bool canShoot = (row == rows - 1); // Only the bottom row can shoot
@@ -34,6 +34,28 @@ void EnemyGrid::Update(float deltaTime, BulletManager& bulletManager) {
     shootTimer += deltaTime;
     std::vector<size_t> canShootIndices;
 
+    bool shouldDrop = false;
+    bool shouldMove = false;
+    if (moveTimer >= moveInterval) {
+        moveTimer = 0.0f;
+        shouldMove = true;
+    }
+
+    // Load grid data
+    for (size_t i = 0; i < enemies.size(); ++i) {
+        Enemy& e = enemies[i];
+        if (!e.alive) continue;
+        if (e.canShoot) canShootIndices.push_back(i);
+
+        if (shouldMove) {
+            moveTimer = 0.0f;
+            e.position.x += direction.x * speed * moveInterval;
+            if (e.position.x + e.width > GetScreenWidth()-(e.width*1) || e.position.x < (e.width*2)) {
+                shouldDrop = true;
+            }
+        }
+    }
+
     if (!canShootIndices.empty() && shootTimer >= shootInterval) {
         shootTimer = 0.0f;
         Enemy& shooter = enemies[canShootIndices[GetRandomValue(0, canShootIndices.size() - 1)]];
@@ -41,26 +63,6 @@ void EnemyGrid::Update(float deltaTime, BulletManager& bulletManager) {
         bulletManager.SpawnEnemyBullet(origin);
     }
 
-    if (moveTimer < moveInterval) return;
-
-    moveTimer = 0.0f;
-    bool shouldDrop = false;
-
-    // Move the whole grid sideways
-    for (size_t i = 0; i < enemies.size(); ++i) {
-        Enemy& e = enemies[i];
-
-        if (!e.alive) continue;
-
-        e.position.x += direction.x * speed * moveInterval;
-
-        if (direction.x > 0 && e.position.x + e.width > GetScreenWidth()-(e.width*1)) shouldDrop = true;
-        if (direction.x < 0 && e.position.x < (e.width*2)) shouldDrop = true;
-
-        if (e.canShoot) {
-            canShootIndices.push_back(i);
-        }
-    }
 
     if (shouldDrop) {
         direction.x = -direction.x;

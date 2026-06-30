@@ -22,8 +22,11 @@ void Game::Update() {
             if (IsKeyPressed(KEY_ENTER)) {
                 state = GameState::PLAYING;
                 enemyGrid.Reset();
+                bulletManager.Reset();
                 player = Player();
                 score = 0;
+                lives = 3;
+                level = 1;
             }
             break;
 
@@ -56,7 +59,14 @@ void Game::UpdatePlaying() {
     enemyGrid.Update(deltaTime, bulletManager);
 
     bulletManager.Update(deltaTime);
-    bulletManager.CheckCollisions(enemyGrid, player);
+    bool playerHit = false;
+    score += bulletManager.CheckCollisions(enemyGrid, player, playerHit);
+    if (playerHit) {
+        lives -= 1;
+        if (lives <= 0) {
+            state = GameState::GAME_OVER;
+        }
+    }
 }
 
 void Game::Draw() {
@@ -109,4 +119,8 @@ void Game::DrawPlaying() {
     }
     // Utils::DrawTextCentered(TextFormat("LIVES: %i", lives), 0.1f, 20, WHITE);
     // Utils::DrawTextCentered(TextFormat("LEVEL: %i", level), 0.95f, 20, WHITE);
+}
+
+void Game::UpdateScore(int points) {
+    score += points;
 }

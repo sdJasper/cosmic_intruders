@@ -13,7 +13,7 @@ public:
     void Update(float deltaTime);
     void Draw();
 
-    void CheckCollisions(EnemyGrid& enemyGrid, Player& player);
+    int CheckCollisions(EnemyGrid& enemyGrid, Player& player, bool& playerHit);
 
     void Reset();
 

@@ -56,9 +56,11 @@ void BulletManager::Draw() {
     DrawBullets(enemyBullets);
 }
 
-void BulletManager::CheckCollisions(EnemyGrid& enemyGrid, Player& player) {
+int BulletManager::CheckCollisions(EnemyGrid& enemyGrid, Player& player, bool& playerHit) {
     auto& enemies = enemyGrid.GetEnemies(); // calls the non-const overload
     const auto& playerRect = player.GetRect();
+    int score = 0;
+    playerHit = false;
 
     // Player bullets vs Enemies
     for (auto& pb : playerBullets) {
@@ -78,7 +80,7 @@ void BulletManager::CheckCollisions(EnemyGrid& enemyGrid, Player& player) {
                 mutableEnemy.alive = false;
                 mutableEnemy.canShoot = false;
                 pb.active = false;
-
+                score += 30 - (e.type * 10);
                 // Promote new shooter in column
                 int col = i % COLS;
                 for (int row = 4; row >= 0; --row) {
@@ -100,12 +102,15 @@ void BulletManager::CheckCollisions(EnemyGrid& enemyGrid, Player& player) {
     for (auto& eb : enemyBullets) {
         if (!eb.active) continue;
 
-        if (CheckCollisionCircleRec(eb.position, eb.radius, player.GetRect())) {
+        if (CheckCollisionCircleRec(eb.position, eb.radius, playerRect)) {
             // Handle player hit
             eb.active = false;
+            playerHit = true;
             break;  // one collision per bullet
         }
     }
+
+    return score;
 }
 
 void BulletManager::Reset() {
