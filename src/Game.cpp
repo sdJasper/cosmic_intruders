@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "Player.h"
 #include "Shield.h"
+#include <string>
 
 Game::Game() {
     InitWindow(screen.width, screen.height, "Cosmic Intruders");
@@ -22,7 +23,6 @@ void Game::Update() {
         case GameState::MAIN_MENU:
             if (IsKeyPressed(KEY_ENTER)) {
                 enemyGrid.Reset();
-                bulletManager.Reset();
                 player = Player();
                 InitShields();
                 score = 0;
@@ -45,6 +45,11 @@ void Game::Update() {
                 state = GameState::PLAYING;
             }
             break;
+        
+        case GameState::LEVEL_COMPLETE:
+            bulletManager.Reset();
+            UpdateLevelComplete(GetFrameTime());
+            break;
 
         case GameState::GAME_OVER:
             if (IsKeyPressed(KEY_ENTER)) {
@@ -60,17 +65,36 @@ void Game::UpdatePlaying() {
     
     player.Update(deltaTime, bulletManager);
     enemyGrid.Update(deltaTime, bulletManager);
-
     bulletManager.Update(deltaTime);
+
     bool playerHit = false;
     score += bulletManager.CheckCollisions(enemyGrid, player, shields, playerHit);
 
     if (playerHit) {
         lives -= 1;
-        if (lives <= 0) {
-            state = GameState::GAME_OVER;
-        }
+        if (lives <= 0) state = GameState::GAME_OVER;
     }
+
+    if (enemyGrid.GetAliveCount() < 1) {
+        state = GameState::LEVEL_COMPLETE;
+        levelCompleteTimer = 0.0f;
+    }
+}
+
+void Game::UpdateLevelComplete(float deltaTime) {
+    levelCompleteTimer += deltaTime;
+    if (levelCompleteTimer >= LEVEL_COMPLETE_DELAY) {
+        level++;
+        enemyGrid.Reset(level);   // pass level so grid can start lower
+        bulletManager.Reset(); // deactivate all bullets mid-flight
+        // shields intentionally NOT reset
+        state = GameState::PLAYING;
+    }
+}
+
+void Game::DrawLevelComplete() {
+    Utils::DrawTextCentered(TextFormat("WAVE %d CLEAR", level), GetScreenWidth()/2 - 100, 30, GREEN);
+    Utils::DrawTextCentered(TextFormat("SCORE: %d", score), GetScreenHeight()/2 + 40, 20, WHITE);
 }
 
 
@@ -105,6 +129,12 @@ void Game::Draw() {
             Utils::DrawTextCentered("PAUSED", 0.5f, 50, YELLOW);
             Utils::DrawTextCentered("Press P to Resume", 0.6f, 30, LIGHTGRAY);
             break;
+
+        case GameState::LEVEL_COMPLETE:
+            DrawPlaying();
+            DrawLevelComplete();
+            break;
+
     }
 
     EndDrawing();

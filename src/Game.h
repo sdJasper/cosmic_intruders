@@ -14,6 +14,7 @@ enum class GameState {
     MAIN_MENU,
     PLAYING,
     PAUSED,
+    LEVEL_COMPLETE,
     GAME_OVER
 };
 
@@ -30,7 +31,7 @@ private:
 
     Screen screen{672, 768}; // original was 224x256    x3 would be 672 x 768
     GameState state = GameState::MAIN_MENU;
-    
+
     Player player;
     EnemyGrid enemyGrid;
     BulletManager bulletManager;
@@ -39,8 +40,12 @@ private:
     int score = 0;
     int lives = 3;
     int level = 1;
+    float levelCompleteTimer = 0.0f;
+    static constexpr float LEVEL_COMPLETE_DELAY = 2.0f;
 
     // updateScore
     void UpdateScore(int points);
     void InitShields();
+    void UpdateLevelComplete(float deltaTime);
+    void DrawLevelComplete();
 };

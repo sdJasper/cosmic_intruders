@@ -6,15 +6,18 @@
 EnemyGrid::EnemyGrid() {
 }
 
-void EnemyGrid::Reset() {
-    moveInterval = BASE_INTERVAL;
+void EnemyGrid::Reset(int level) {
+    enemies.clear();
+    moveInterval = std::max(BASE_INTERVAL - (level - 1) * 0.05f, MIN_INTERVAL);
 
     const int rows = 5;
     const int startX = 90;
-    const int startY = GetScreenHeight() * 0.25f;
+
+    const int levelOffset = std::min((level -1) * 24, 128);
+    const int startY = GetScreenHeight() * 0.15f + levelOffset; // 115, 123, 131
+
     const int spacingX = ENEMY_WIDTH + 8;
     const int spacingY = ENEMY_HEIGHT + 16;
-    enemies.clear();
 
     for (int row = 0; row < rows; row++) {
         bool canShoot = (row == rows - 1); // Only the bottom row can shoot

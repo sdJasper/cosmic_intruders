@@ -29,7 +29,7 @@ public:
     EnemyGrid();
     void Update(float deltaTime, BulletManager& bulletManager);
     void Draw();
-    void Reset();
+    void Reset(int level = 1);
     int GetAliveCount() const;
     void OnEnemyKilled();
 };
