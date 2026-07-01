@@ -15,6 +15,7 @@ enum class GameState {
     PLAYING,
     PAUSED,
     LEVEL_COMPLETE,
+    PLAYER_RESPAWN,
     GAME_OVER
 };
 
@@ -41,6 +42,7 @@ private:
     int lives = 3;
     int level = 1;
     float levelCompleteTimer = 0.0f;
+    float playerRespawnTimer = 0.0f;
     static constexpr float LEVEL_COMPLETE_DELAY = 2.0f;
 
     // updateScore
@@ -48,4 +50,6 @@ private:
     void InitShields();
     void UpdateLevelComplete(float deltaTime);
     void DrawLevelComplete();
+
+    Sound stepSound;
 };

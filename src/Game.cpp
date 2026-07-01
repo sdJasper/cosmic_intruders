@@ -6,6 +6,8 @@
 
 Game::Game() {
     InitWindow(screen.width, screen.height, "Cosmic Intruders");
+    InitAudioDevice();
+    stepSound = LoadSound("assets/step.wav");
     SetTargetFPS(60);
     bulletManager = BulletManager();
 }
@@ -15,6 +17,8 @@ void Game::Run() {
         Update();
         Draw();
     }
+    UnloadSound(stepSound);
+    CloseAudioDevice();
     CloseWindow();
 }
 
@@ -51,6 +55,17 @@ void Game::Update() {
             UpdateLevelComplete(GetFrameTime());
             break;
 
+        case GameState::PLAYER_RESPAWN: {
+            bulletManager.Reset();
+            playerRespawnTimer += GetFrameTime();
+            if (playerRespawnTimer >= 0.5f) { // respawn delay
+                playerRespawnTimer = 0.0f;
+                player = Player();
+                state = GameState::PLAYING;
+            }
+            break;
+        }
+
         case GameState::GAME_OVER:
             if (IsKeyPressed(KEY_ENTER)) {
                 state = GameState::MAIN_MENU;
@@ -64,15 +79,27 @@ void Game::UpdatePlaying() {
     float deltaTime = GetFrameTime();
     
     player.Update(deltaTime, bulletManager);
-    enemyGrid.Update(deltaTime, bulletManager);
+    bool playerReached = enemyGrid.Update(deltaTime, bulletManager, shields, stepSound);
+    if (playerReached) {
+        state = GameState::GAME_OVER;
+        return;
+    }
     bulletManager.Update(deltaTime);
 
     bool playerHit = false;
+    int scoreBefore = score;
     score += bulletManager.CheckCollisions(enemyGrid, player, shields, playerHit);
+    if (scoreBefore < 1500 && score >= 1500) {
+        lives += 1; // extra life at 1500 points
+    }
 
     if (playerHit) {
         lives -= 1;
-        if (lives <= 0) state = GameState::GAME_OVER;
+        if (lives <= 0) {
+            state = GameState::GAME_OVER;
+        } else {
+            state = GameState::PLAYER_RESPAWN;
+        }
     }
 
     if (enemyGrid.GetAliveCount() < 1) {

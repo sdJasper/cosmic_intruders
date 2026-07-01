@@ -76,3 +76,26 @@ void Shield::Draw() const {
         }
     }
 }
+
+void Shield::EraseOverlap(Rectangle enemyRect) {
+    Rectangle bounds = GetBounds();
+    if (!CheckCollisionRecs(bounds, enemyRect)) return; // quick reject
+
+    // find which cells the enemy rect covers and destroy them
+    int colStart = (int)((enemyRect.x - position.x) / CELL_SIZE);
+    int colEnd   = (int)((enemyRect.x + enemyRect.width - position.x) / CELL_SIZE);
+    int rowStart = (int)((enemyRect.y - position.y) / CELL_SIZE);
+    int rowEnd   = (int)((enemyRect.y + enemyRect.height - position.y) / CELL_SIZE);
+
+    // clamp to shield bounds
+    colStart = std::max(colStart, 0);
+    colEnd   = std::min(colEnd,   COLS - 1);
+    rowStart = std::max(rowStart, 0);
+    rowEnd   = std::min(rowEnd,   ROWS - 1);
+
+    for (int row = rowStart; row <= rowEnd; row++) {
+        for (int col = colStart; col <= colEnd; col++) {
+            cells[GetIndex(col, row)] = false;
+        }
+    }
+}

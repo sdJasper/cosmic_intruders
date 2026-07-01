@@ -4,7 +4,7 @@
 #include "math.h"
 
 Player::Player() {
-    rect = { GetScreenWidth() / 2.0f, GetScreenHeight() * 0.86f, PLAYER_WIDTH, PLAYER_HEIGHT };
+    rect = { GetScreenWidth() / 10.0f, GetScreenHeight() * 0.86f, PLAYER_WIDTH, PLAYER_HEIGHT };
 }
 
 Rectangle Player::GetRect() const {

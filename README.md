@@ -2,18 +2,19 @@
 Space Invaders Clone in C++
 
 # Todo:
-    Shields & shield damage - done
-    Enemy apperance (sprite system?) - done
-    Level progression - done
+    Enemies reaching shields should destroy those portions - done
+    Game over when enemies reach bottom - done
+    Player respawn time/location - done
+    Extra life award - done
 
     Death fx - wip
+    Sounds - wip
 
-    Enemies reaching shields should destroy those portions.
-    Sounds
+    Hi-score screen/name input
     Add flying saucer
-    Player respawn time/location
-    Extra life award (1500 then ??? maybe just the 1 extra life?)
     Balancing and Polish
+        > Play can only shoot when no existing player bullet exist?
+        > Shots should explode at the top and bottom (red line) locations
         > In the original killing an enemy paused movement for a few frames
         > Enemies had 3 different "bombs" (bullets) w/ different sprites and behaviors?
         > Saucer points were based on how many shots the player fired

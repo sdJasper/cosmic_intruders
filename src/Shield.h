@@ -3,6 +3,9 @@
 #include <vector>
 
 class Shield {
+private:
+    int GetIndex(int col, int row) const { return row * COLS + col; }
+
 public:
     static constexpr int COLS = 22;
     static constexpr int ROWS = 16;
@@ -16,7 +19,5 @@ public:
     Rectangle GetBounds() const;
     bool CheckHit(Vector2 point, float radius);
     void Draw() const;
-
-private:
-    int GetIndex(int col, int row) const { return row * COLS + col; }
+    void EraseOverlap(Rectangle enemyRect);
 };

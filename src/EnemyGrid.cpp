@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "BulletManager.h"
 #include <string>
+#include "Shield.h"
 
 EnemyGrid::EnemyGrid() {
 }
@@ -36,51 +37,64 @@ void EnemyGrid::Reset(int level) {
     }
 }
 
-void EnemyGrid::Update(float deltaTime, BulletManager& bulletManager) {
-    if (enemies.empty()) return;
+bool EnemyGrid::Update(float deltaTime, BulletManager& bulletManager, std::vector<Shield>& shields, Sound& stepSound) {
+    if (enemies.empty()) return false;
 
     moveTimer += deltaTime;
     shootTimer += deltaTime;
     std::vector<size_t> canShootIndices;
 
-    bool shouldDrop = false;
-    bool shouldMove = false;
-    if (moveTimer >= moveInterval) {
-        moveTimer = 0.0f;
-        shouldMove = true;
-    }
+    if (moveTimer < moveInterval) return false;
+    moveTimer = 0.0f;
 
-    // Load grid data
+    SetSoundPitch(stepSound, PITCHES[stepIndex % 4]);
+    stepIndex++;
+    PlaySound(stepSound);
+
+    bool shouldDrop = false;
+
     for (size_t i = 0; i < enemies.size(); ++i) {
         Enemy& e = enemies[i];
         if (!e.alive) continue;
+
+        e.currentFrame = 1 - e.currentFrame;
+        e.position.x += direction.x * STEP_SIZE;
+
+        if (direction.x > 0 && e.position.x + e.width > GetScreenWidth() - (e.width * 1)) shouldDrop = true;
+        if (direction.x < 0 && e.position.x < e.width * 2) shouldDrop = true;
+
         if (e.canShoot) canShootIndices.push_back(i);
 
-        if (shouldMove) {
-            e.currentFrame = 1 - e.currentFrame;
-            e.position.x += direction.x * STEP_SIZE;
-            if (e.position.x + e.width > GetScreenWidth()-(e.width*1) || e.position.x < (e.width*2)) {
-                shouldDrop = true;
-            }
+        // erase any shield cells this enemy overlaps
+        Rectangle enemyRect = { e.position.x, e.position.y, (float)e.width, (float)e.height };
+        for (auto& shield : shields) {
+            shield.EraseOverlap(enemyRect);
         }
+    }
+
+    if (shouldDrop) {
+        direction.x = -direction.x;
+        for (auto& e : enemies) {
+            if (e.alive) e.position.y += dropDistance;
+        }
+        // check if lowest enemy has reached the player area
+        float lowestY = 0.0f;
+        for (const auto& e : enemies) {
+            if (e.alive && e.position.y > lowestY) lowestY = e.position.y;
+        }
+        if (lowestY + ENEMY_HEIGHT >= GetScreenHeight() * 0.93f) {
+            return true; // player hit
+        }
+
     }
 
     if (!canShootIndices.empty() && shootTimer >= shootInterval) {
         shootTimer = 0.0f;
         Enemy& shooter = enemies[canShootIndices[GetRandomValue(0, canShootIndices.size() - 1)]];
-        const Vector2 origin = {shooter.position.x + (shooter.width / 2), shooter.position.y + shooter.height};
+        const Vector2 origin = { shooter.position.x + (shooter.width / 2), shooter.position.y + shooter.height };
         bulletManager.SpawnEnemyBullet(origin);
     }
-
-
-    if (shouldDrop) {
-        direction.x = -direction.x;
-        for (auto& e : enemies) {
-            if (e.alive) {
-                e.position.y += dropDistance;
-            }
-        }
-    }
+    return false;
 }
 
 void EnemyGrid::Draw() {
